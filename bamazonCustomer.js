@@ -1,5 +1,6 @@
 var inquirer = require("inquirer");
 var mysql = require("mysql");
+var objects;
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -74,11 +75,37 @@ function purchase() {
             .then(function(answer){
                 var chosenItem;
                 for (var i = 0; i < results.length; i++) {
-                  if (results[i].item_id === answer.choice) {
+                    
+                  if (results[i].product_name === answer.choice) {
                     chosenItem = results[i];
                   }
                 }
-               
-            })
+                if (chosenItem.stock_quantity > parseInt(answer.amount)) {
+                    var stock = chosenItem.stock_quantity -= answer.amount
+                    connection.query(
+                      "UPDATE products SET ? WHERE ?",
+                      [
+                        {
+                            stock_quantity: stock
+                        },
+                        {
+                            item_id: chosenItem.item_id
+                        }
+                      ],
+                      function(error) {
+                        if (error) {
+                            console.log(error);
+                            throw error;   
+                        }
+                        console.log("Bought succesfully!");
+                        start();
+                      }
+                    );
+                  }
+                  else {
+                    console.log("Insufficient stock!");
+                    start();
+                  }
+            }).catch(function(error) {console.log(error)})
     })
 }
