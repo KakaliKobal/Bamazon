@@ -75,13 +75,12 @@ function productSearch() {
 }
 
 function inventorySearch() {
-    connection.query("Select * FROM products", function(err, res){
+    connection.query("Select * FROM products WHERE stock_quantity < 5", function(err, res){
         if (err) throw err;
         var result;
         for (var i = 0; i < res.length; i++){
+            
             result = res[i];
-        }; 
-        if (result.stock_quantity < 5) {
             console.log("Items with low inventory are:\n");
             console.log(
                 "ID: " +
@@ -93,9 +92,11 @@ function inventorySearch() {
                 " || In Stock: " +
                 result.stock_quantity
             );
-        } else {
-            console.log("There are no items in low stock")
-        };
+            
+        }; 
+        if (res.length === 0){
+            console.log("There are no items low in stock");
+        }
         menu();
     });
 }
